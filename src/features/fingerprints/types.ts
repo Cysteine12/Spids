@@ -15,7 +15,7 @@ export type CaptureState =
   | 'Saving...'
   | (string & {})
 
-export type MatchingState =
+export type MatchState =
   | 'Ready to match'
   | 'Matching...'
   | 'Matching completed'

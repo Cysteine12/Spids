@@ -106,10 +106,13 @@ const StudentPage = () => {
                       <td className="p-2 pl-2 w-100 text-capitalize">
                         <div className="bg-gray-200 pl-2">
                           {student?.fingerprints?.length === 5 && 'Enrolled'}
-                          {student?.fingerprints?.length > 0 &&
-                          student?.fingerprints?.length < 5 ? (
-                            <span>
-                              <span>Incomplete</span>
+                          {student?.fingerprints?.length < 5 && (
+                            <>
+                              <span>
+                                {student?.fingerprints?.length > 0
+                                  ? 'Incomplete'
+                                  : 'Not Enrolled'}
+                              </span>
                               <Button
                                 onClick={() =>
                                   navigate(`/fingerprints/${student.id}/enroll`)
@@ -118,19 +121,7 @@ const StudentPage = () => {
                               >
                                 <FaFingerprint className="mr-1" /> Enroll
                               </Button>
-                            </span>
-                          ) : (
-                            <span>
-                              <span>Not Enrolled</span>
-                              <Button
-                                onClick={() =>
-                                  navigate(`/fingerprints/${student.id}/enroll`)
-                                }
-                                className="mx-auto btn-sm ml-1 bg-dark"
-                              >
-                                <FaFingerprint className="mr-1" /> Enroll
-                              </Button>
-                            </span>
+                            </>
                           )}
                         </div>
                       </td>

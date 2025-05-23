@@ -7,9 +7,10 @@ import AdminLayout from '../layouts/AdminLayout'
 import DashboardPage from '../pages/admin/DashboardPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import StudentsPage from '../pages/admin/students/StudentsPage'
-import FingerprintsCreatePage from '../pages/admin/fingerprints/FingerprintsCreatePage'
+import FingerprintsCapturePage from '../pages/admin/fingerprints/FingerprintsCapturePage'
 import StudentCreatePage from '../pages/admin/students/StudentCreatePage'
 import StudentPage from '../pages/admin/students/StudentPage'
+import FingerprintsMatchPage from '../pages/admin/fingerprints/FingerprintsMatchPage'
 
 const router = createBrowserRouter([
   {
@@ -56,11 +57,11 @@ const router = createBrowserRouter([
         children: [
           {
             path: ':studentId/enroll',
-            element: <ErrorBoundary children={<FingerprintsCreatePage />} />,
+            element: <ErrorBoundary children={<FingerprintsCapturePage />} />,
           },
           {
             path: ':studentId/verify',
-            element: <ErrorBoundary children={<FingerprintsCreatePage />} />,
+            element: <ErrorBoundary children={<FingerprintsMatchPage />} />,
           },
         ],
       },

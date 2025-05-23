@@ -53,7 +53,7 @@ const StudentsPage = () => {
 
       <Suspense isLoading={isLoading}>
         <div className="card shadow mb-4">
-          <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <div className="card-header text-nowrap py-3 d-flex flex-row align-items-center justify-content-between">
             <h6 className="m-0 font-weight-bold text-primary">
               Students Table
             </h6>
@@ -92,25 +92,41 @@ const StudentsPage = () => {
                   {students?.map((student, index) => (
                     <tr key={student.id}>
                       <td>{index + 1}.</td>
-                      <td className="text-capitalize text-nowrap">
+                      <td className="text-capitalize">
                         {student.firstName} {student.lastName}
                       </td>
                       <td>{student.matricNo}</td>
                       <td>{student.email}</td>
                       <td>
-                        {student._count?.fingerprints === 5 && 'Enrolled'}
-                        {student._count?.fingerprints > 0 &&
-                        student._count?.fingerprints < 5 ? (
-                          'Incomplete'
-                        ) : (
-                          <Button
-                            onClick={() =>
-                              navigate(`/fingerprints/${student.id}/enroll`)
-                            }
-                            className="mx-auto btn-sm d-flex align-items-center m-0 bg-dark"
-                          >
-                            <FaFingerprint className="mr-1" /> Enroll
-                          </Button>
+                        {student._count?.fingerprints === 5 && (
+                          <>
+                            <span>Enrolled</span>
+                            <Button
+                              onClick={() =>
+                                navigate(`/fingerprints/${student.id}/verify`)
+                              }
+                              className="mx-auto btn-sm ml-1 bg-dark"
+                            >
+                              <FaFingerprint className="mr-1" /> Verify
+                            </Button>
+                          </>
+                        )}
+                        {student._count?.fingerprints < 5 && (
+                          <>
+                            <span>
+                              {student._count?.fingerprints > 0
+                                ? 'Incomplete'
+                                : 'Not Enrolled'}
+                            </span>
+                            <Button
+                              onClick={() =>
+                                navigate(`/fingerprints/${student.id}/enroll`)
+                              }
+                              className="mx-auto btn-sm ml-1 bg-dark"
+                            >
+                              <FaFingerprint className="mr-1" /> Enroll
+                            </Button>
+                          </>
                         )}
                       </td>
                       <td>{formatDateIntl(student.updatedAt)}</td>
