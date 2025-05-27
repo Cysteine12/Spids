@@ -26,6 +26,7 @@ API.interceptors.response.use(
         await API.post(`/api/auth/logout`)
         localStorage.removeItem('auth')
 
+        location.assign('/login')
         return Promise.reject(err)
       }
     }

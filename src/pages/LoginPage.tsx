@@ -17,15 +17,15 @@ const LoginPage = () => {
   }
 
   useEffect(() => {
-    document.body.classList.add('bg-primary')
+    document.body.classList.add('bg-dark')
 
     return () => {
-      document.body.classList.remove('bg-primary')
+      document.body.classList.remove('bg-dark')
     }
   }, [])
 
   return (
-    <div className="container">
+    <div className="container bg-dark">
       <div className="row justify-content-center">
         <div className="col-lg-6 col-md-8">
           <div className="card o-hidden border-0 shadow-lg my-5">
@@ -36,6 +36,12 @@ const LoginPage = () => {
                 </div>
                 <form onSubmit={handleSubmit} className="user">
                   <div className="form-group">
+                    <label
+                      htmlFor="email"
+                      className="font-weight-bold text-primary"
+                    >
+                      Email
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -47,7 +53,13 @@ const LoginPage = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="form-group py-2">
+                    <label
+                      htmlFor="password"
+                      className="font-weight-bold text-primary"
+                    >
+                      Password
+                    </label>
                     <input
                       type="password"
                       name="password"

@@ -3,89 +3,61 @@ import AppPopup from '../../../components/AppPopup'
 import FingerImg1 from '../../../assets/imgs/PlaceFinger.bmp'
 import FingerImg2 from '../../../assets/imgs/PlaceFinger2.bmp'
 import type {
-  FingerType,
-  CaptureState,
   FingerprintCaptureAPIResponse,
+  FingerType,
+  MatchState,
 } from '../types'
 import { useStudentStore } from '../../students'
 import Button from '../../../components/ui/Button'
-import { useCreateFingerprint, useFingerprintCapture } from '../hooks'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { toast } from 'react-toastify'
-import type { APIResponse } from '../../../types'
-import { useFingerprintStore } from '../store'
+import { useFingerprintCapture, useFingerprintMatch } from '../hooks'
+import { useRef, useState, type FormEvent } from 'react'
 
 interface Props {
   isModalOpen: boolean
   setIsModalOpen: (isModalOpen: boolean) => void
   fingerType: FingerType
+  template: string
 }
 
-const CaptureModal = ({ isModalOpen, setIsModalOpen, fingerType }: Props) => {
-  const { fingerprints, setFingerprints } = useFingerprintStore()
+const MatchModal = ({
+  isModalOpen,
+  setIsModalOpen,
+  fingerType,
+  template,
+}: Props) => {
   const imageRef = useRef<HTMLImageElement>(null)
-  const [captureStatus, setCaptureStatus] =
-    useState<CaptureState>('Ready to capture')
+  const [matchStatus, setMatchStatus] = useState<MatchState>('Ready to match')
   const [captureResult, setCaptureResult] =
     useState<FingerprintCaptureAPIResponse | null>(null)
   const { students } = useStudentStore()
-  const { startCapture, stopCapture } = useFingerprintCapture(setCaptureStatus)
-  const {
-    mutate: createFingerprint,
-    isPending,
-    isSuccess,
-    isError,
-    data,
-  } = useCreateFingerprint()
+  const { startCapture, stopCapture } = useFingerprintCapture(setMatchStatus)
+  const { startMatch, stopMatch } = useFingerprintMatch()
 
-  const handleStartCapture = async () => {
+  const handleStartMatch = async () => {
     imageRef.current!.src = FingerImg1
 
-    const res = await startCapture()
-    if (!res) {
+    const captureRes = await startCapture()
+    if (!captureRes) {
       imageRef.current!.src = FingerImg2
       return
     }
+    setCaptureResult(captureRes)
 
-    setCaptureResult(res)
-    imageRef.current!.src = `data:image/bmp;base64,${res.BMPBase64}`
+    imageRef.current!.src = `data:image/bmp;base64,${captureRes.BMPBase64}`
+
+    await startMatch(template, captureRes.TemplateBase64, setMatchStatus)
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleClose = (e: FormEvent) => {
     e.preventDefault()
-    if (!captureResult || !captureResult.TemplateBase64) return
 
-    setCaptureStatus('Saving...')
-
-    createFingerprint({
-      studentId: students[0].id,
-      template: captureResult.TemplateBase64,
-      type: fingerType,
-    })
+    setIsModalOpen(false)
   }
 
-  const handleStopCapture = () => stopCapture()
-
-  // Refactor this shit bruh!!!
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success(data.message)
-
-      setFingerprints([
-        ...fingerprints,
-        {
-          id: '',
-          studentId: students[0].id,
-          type: fingerType,
-          template: captureResult!.TemplateBase64!,
-          createdAt: '',
-          updatedAt: '',
-        },
-      ])
-      setIsModalOpen(false)
-    }
-    if (isError) setCaptureStatus((data as unknown as APIResponse).message!)
-  }, [isPending])
+  const handleStopCapture = () => {
+    stopCapture()
+    stopMatch()
+  }
 
   return (
     <AppPopup
@@ -93,15 +65,11 @@ const CaptureModal = ({ isModalOpen, setIsModalOpen, fingerType }: Props) => {
       setIsModalOpen={setIsModalOpen}
       title={
         <>
-          <FaFingerprint className="mt-1 mr-2" /> Fingerprint Enrollment
+          <FaFingerprint className="mt-1 mr-2" /> Fingerprint Verification
         </>
       }
     >
-      <form
-        onSubmit={handleSubmit}
-        className="p-1 px-2"
-        style={{ minWidth: '500px' }}
-      >
+      <form className="p-1 px-2" style={{ minWidth: '500px' }}>
         <div className="d-flex flex-col border p-2">
           <fieldset className="border p-2" style={{ width: '280px' }}>
             <legend className="w-auto px-2" style={{ fontSize: '12px' }}>
@@ -155,7 +123,7 @@ const CaptureModal = ({ isModalOpen, setIsModalOpen, fingerType }: Props) => {
             </fieldset>
 
             <div className="card bg-info text-white px-2 py-1 my-1">
-              [{fingerType} FINGER] - {captureStatus}
+              [{fingerType} FINGER] - {matchStatus}
             </div>
 
             <div
@@ -163,22 +131,22 @@ const CaptureModal = ({ isModalOpen, setIsModalOpen, fingerType }: Props) => {
               style={{ bottom: '10px', right: '10px' }}
             >
               <Button
-                onClick={handleStartCapture}
+                onClick={handleStartMatch}
                 text={'Scan'}
                 className="bg-primary px-3"
-                disabled={captureStatus === 'Capturing...'}
+                disabled={matchStatus === 'Capturing...'}
               />
               <Button
-                type="submit"
-                text={'Save'}
+                onClick={handleClose}
+                text={'Close'}
                 className="bg-success px-3 mx-1"
-                disabled={captureStatus !== 'Capture successful'}
+                disabled={matchStatus === 'Matching...'}
               />
               <Button
                 onClick={handleStopCapture}
                 text={'Stop'}
                 className="bg-danger px-3"
-                disabled={captureStatus !== 'Capturing...'}
+                disabled={matchStatus !== 'Capturing...'}
               />
             </div>
           </div>
@@ -187,4 +155,5 @@ const CaptureModal = ({ isModalOpen, setIsModalOpen, fingerType }: Props) => {
     </AppPopup>
   )
 }
-export default CaptureModal
+
+export default MatchModal

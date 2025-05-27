@@ -1,20 +1,24 @@
 import axios from 'axios'
+import type { FingerprintCaptureAPIResponse } from '../features/fingerprints'
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_FINGERPRINT_API_URL,
 })
 
 const fingerprintService = () => {
-  const captureFingerprint = async (controller: AbortController) => {
-    const payload = {
-      Timeout: 10000,
-      Quality: 50,
-      TemplateFormat: 'ISO',
-      ImageWSQRate: 0.75,
-      // Licstr: import.meta.env.VITE_FINGERPRINT_LICENSE
-    }
+  const captureFingerprint = async (
+    controller: AbortController
+  ): Promise<FingerprintCaptureAPIResponse> => {
+    const payload = new URLSearchParams({
+      Timeout: '10000',
+      Quality: '80',
+      templateFormat: 'ISO',
+      imageWSQRate: '0.75',
+      // licstr: import.meta.env.VITE_FINGERPRINT_LICENSE
+    })
 
     const { data } = await API.post('/SGIFPCapture', payload, {
+      timeout: 15000,
       signal: controller.signal,
     })
     return data
@@ -25,14 +29,15 @@ const fingerprintService = () => {
     template2: string,
     controller: AbortController
   ) => {
-    const payload = {
-      Template1: template1,
-      Template2: template2,
-      TemplateFormat: 'ISO',
-      // Licstr: import.meta.env.VITE_FINGERPRINT_LICENSE
-    }
+    const payload = new URLSearchParams({
+      template1: template1,
+      template2: template2,
+      templateFormat: 'ISO',
+      // licstr: import.meta.env.VITE_FINGERPRINT_LICENSE
+    })
 
     const { data } = await API.post('/SGIMatchScore', payload, {
+      timeout: 15000,
       signal: controller.signal,
     })
     return data
@@ -41,7 +46,7 @@ const fingerprintService = () => {
   return { captureFingerprint, matchFingerprints }
 }
 
-const getErrorMessage = (errorCode: number): string => {
+const getErrorMessageFromErrorCode = (errorCode: number): string => {
   let msg: string
 
   switch (errorCode) {
@@ -145,11 +150,11 @@ const getErrorMessage = (errorCode: number): string => {
       break
 
     default:
-      msg = 'Connection or unknown error'
+      msg = 'Unknown error'
       break
   }
 
   return msg
 }
 
-export { fingerprintService as default, getErrorMessage }
+export { fingerprintService as default, getErrorMessageFromErrorCode }

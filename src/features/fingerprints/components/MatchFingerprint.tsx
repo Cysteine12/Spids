@@ -1,15 +1,15 @@
 import { FaFingerprint } from 'react-icons/fa'
 import { useFingerprintStore } from '../store'
 import type { FingerType } from '../types'
-import { useEffect, useState } from 'react'
-import CaptureModal from './CaptureModal'
+import { useState } from 'react'
+import MatchModal from './MatchModal'
 
 interface Props {
   type: FingerType
   height: string
 }
 
-const CaptureFingerprint = ({ type, height }: Props) => {
+const MatchFingerprint = ({ type, height }: Props) => {
   const col_5 = { flex: '0 0 20%' }
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -17,12 +17,8 @@ const CaptureFingerprint = ({ type, height }: Props) => {
     state.fingerprints.find((fingerprint) => fingerprint?.type === type)
   )
 
-  useEffect(() => {
-    console.log(type)
-  }, [type])
-
   const handleClick = () => {
-    if (fingerprint?.template) return
+    if (!fingerprint?.template) return
 
     setIsModalOpen(true)
   }
@@ -46,18 +42,19 @@ const CaptureFingerprint = ({ type, height }: Props) => {
         </button>
         <div
           className={`font-weight-bold ${
-            fingerprint?.template && 'text-success border-success'
+            fingerprint?.template && 'text-success'
           }`}
         >
           {type}
         </div>
       </div>
-      <CaptureModal
+      <MatchModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         fingerType={type}
+        template={fingerprint?.template || ''}
       />
     </div>
   )
 }
-export default CaptureFingerprint
+export default MatchFingerprint

@@ -3,7 +3,7 @@ import { getFingerprintsByStudent, createFingerprint } from './api'
 import type { CreateFingerprintSchema } from './schema'
 import type { CaptureState, MatchState } from './types'
 import fingerprintService, {
-  getErrorMessage,
+  getErrorMessageFromErrorCode,
 } from '../../libs/fingerprintService'
 import type { APIResponse } from '../../types'
 import type { AxiosError } from 'axios'
@@ -49,8 +49,13 @@ const useFingerprintCapture = (
       const res = await captureFingerprint(controller)
       if (!res) throw new Error('Connection Error. Try again')
 
-      if (res.data?.ErrorCode !== 0) {
-        msg = getErrorMessage(res.data?.ErrorCode)
+      if (res.ErrorCode !== 0 || res.status === 'failed') {
+        msg = getErrorMessageFromErrorCode(res.ErrorCode)
+        return
+      }
+
+      if (res.ImageQuality < 85 || res.NFIQ > 2) {
+        msg = 'Poor quality. Try again'
         return
       }
 
@@ -85,12 +90,15 @@ const useFingerprintMatch = () => {
       const res = await matchFingerprints(template1, template2, controller)
       if (!res) throw new Error('Connection Error. Try again')
 
-      if (res.data?.ErrorCode !== 0) {
-        msg = getErrorMessage(res.data?.ErrorCode)
+      if (res.ErrorCode !== 0) {
+        msg = getErrorMessageFromErrorCode(res.ErrorCode)
         return
       }
 
-      msg = 'Matching completed'
+      if (res.MatchingScore && res.MatchingScore >= 160) {
+        msg = 'Matching verified'
+      } else msg = 'Matching failed'
+
       return res
     } catch (err) {
       msg = (err as Error).message
