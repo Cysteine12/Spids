@@ -1,4 +1,5 @@
-import { Link, useNavigation } from 'react-router'
+import { useNavigate } from 'react-router'
+import Button from './ui/Button'
 
 interface Props {
   currentPage: number
@@ -7,51 +8,57 @@ interface Props {
 }
 
 const AppPagination = (page: Props) => {
-  const navigation = useNavigation()
-
+  const navigate = useNavigate()
   const totalPage = Math.ceil(page.total / page.perPage)
-  const currentRoute = `${navigation.location?.pathname}${navigation.location?.search}`
 
   const pagesIndex = []
   for (let i = 1; i <= totalPage; i++) {
     pagesIndex.push(i)
   }
 
+  const handleClick = (nextPage: number) => {
+    navigate(`?page=${nextPage}`)
+  }
+
   return (
     <nav className="my-5" aria-label="Page navigation">
       {pagesIndex && (
         <ul className="pagination justify-content-center">
-          <li className={`page-item ${page.currentPage === 1 && 'disabled'}`}>
-            <Link
-              to="`${currentRoute}?page=${page.currentPage - 1}`"
-              className="page-link"
+          <li className="page-item">
+            <Button
+              onClick={() => handleClick(page.currentPage - 1)}
+              className={`text-primary rounded-0 ${
+                page.currentPage === 1 && 'text-dark'
+              }`}
+              disabled={page.currentPage === 1}
             >
               Previous
-            </Link>
+            </Button>
           </li>
+
           {pagesIndex.map((pageIndex, index) => (
             <li key={index} className="page-item">
-              <Link
-                to="`${currentRoute}?page=${pageIndex}`"
-                className={`page-link ${
+              <Button
+                onClick={() => handleClick(pageIndex)}
+                className={`text-primary rounded-0 px-3 ${
                   page.currentPage === pageIndex && 'current'
                 } `}
               >
                 {pageIndex}
-              </Link>
+              </Button>
             </li>
           ))}
-          <li
-            className={`page-item ${
-              page.currentPage === totalPage && 'disabled'
-            }`}
-          >
-            <Link
-              to={`${currentRoute}?page=${page.currentPage + 1}`}
-              className="page-link"
+
+          <li className="page-item">
+            <Button
+              onClick={() => handleClick(page.currentPage + 1)}
+              className={`text-primary rounded-0 ${
+                page.currentPage === totalPage && 'text-dark'
+              }`}
+              disabled={page.currentPage === totalPage}
             >
               Next
-            </Link>
+            </Button>
           </li>
         </ul>
       )}

@@ -4,16 +4,15 @@ import {
   useStudents,
   type Student,
 } from '../../../features/students'
-import type { APIResponse, Pagination } from '../../../types'
-import { toast } from 'react-toastify'
-import type { AxiosError } from 'axios'
+import type { Pagination } from '../../../types'
 import { formatDateIntl } from '../../../utils/dateFormatter'
 import Suspense from '../../../components/Suspense'
 import { useEffect, useState } from 'react'
 import { useDebounce } from '../../../hooks/useDebounce'
 import Button from '../../../components/ui/Button'
 import { FaEye, FaFingerprint } from 'react-icons/fa'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
+import AppPagination from '../../../components/AppPagination'
 
 const StudentsPage = () => {
   const navigate = useNavigate()
@@ -22,13 +21,14 @@ const StudentsPage = () => {
   >(null)
   const [searchValue, setSearchValue] = useState('')
 
-  const query: Pagination = { page: 1, limit: 20 }
-  const { data: studentsData, isLoading, error } = useStudents(query)
+  const [searchParams] = useSearchParams()
+  const [pagination] = useState<Pagination>({
+    page: Number(searchParams.get('page')) || 1,
+    limit: 20,
+  })
+  const { data: studentsData, isLoading } = useStudents(pagination)
   const { mutate: searchStudentsByMatric, data: studentsSearchData } =
     useSearchStudentsByMatric()
-
-  if (error)
-    toast.error((error as AxiosError<APIResponse>).response?.data?.message)
 
   useEffect(() => {
     if (studentsData) setStudents(studentsData?.data)
@@ -37,9 +37,14 @@ const StudentsPage = () => {
     if (studentsSearchData) setStudents(studentsSearchData?.data)
   }, [studentsSearchData])
 
+  useEffect(() => {
+    pagination.page = Number(searchParams.get('page')) || 1
+  }, [searchParams.get('page')])
+
   useDebounce(
     () => {
       if (searchValue || studentsData) {
+        const query = { page: 1, limit: pagination.limit }
         searchStudentsByMatric({ matricNo: searchValue, query })
       }
     },
@@ -150,6 +155,13 @@ const StudentsPage = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+          <div className="card-footer">
+            <AppPagination
+              currentPage={pagination.page}
+              perPage={pagination.limit}
+              total={studentsData?.total}
+            />
           </div>
         </div>
       </Suspense>

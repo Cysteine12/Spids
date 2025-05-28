@@ -14,7 +14,7 @@ import type { AxiosError } from 'axios'
 const useStudents = (query: Pagination) => {
   return useQuery({
     queryFn: () => getStudents(query),
-    queryKey: ['students'],
+    queryKey: ['students', query.page],
   })
 }
 

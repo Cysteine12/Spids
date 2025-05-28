@@ -1,7 +1,7 @@
 import { FaFingerprint } from 'react-icons/fa'
 import { useFingerprintStore } from '../store'
 import type { FingerType } from '../types'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import CaptureModal from './CaptureModal'
 
 interface Props {
@@ -16,10 +16,6 @@ const CaptureFingerprint = ({ type, height }: Props) => {
   const fingerprint = useFingerprintStore((state) =>
     state.fingerprints.find((fingerprint) => fingerprint?.type === type)
   )
-
-  useEffect(() => {
-    console.log(type)
-  }, [type])
 
   const handleClick = () => {
     if (fingerprint?.template) return
